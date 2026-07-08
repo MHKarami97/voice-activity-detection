@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voice Activity Detection | Real-Time VAD System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulseRing {
+            0% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55);
+            }
+
+            100% {
+                box-shadow: 0 0 0 24px rgba(34, 197, 94, 0);
+            }
+        }
+
+        .speaking {
+            animation: pulseRing 1.1s ease-out infinite;
+        }
+
+        #waveform {
+            background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
+        }
+    </style>
+</head>
+
+<body class="h-full bg-slate-950 text-slate-100 font-sans">
+    <div class="min-h-full flex flex-col items-center px-4 py-8 gap-6 max-w-4xl mx-auto">
+
+        <header class="text-center space-y-1">
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Voice Activity Detection</h1>
+            <p class="text-slate-400 text-sm">Client-side real-time VAD &middot; Energy + Zero-Crossing-Rate strategy
+            </p>
+        </header>
+
+        <section class="w-full bg-slate-900/70 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl backdrop-blur">
+            <canvas id="waveform" class="w-full h-40 sm:h-56 rounded-xl border border-slate-800"></canvas>
+        </section>
+
+        <section class="flex flex-col items-center gap-3">
+            <div id="statusDot"
+                class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-slate-700 flex items-center justify-center transition-colors duration-150">
+                <svg id="micIcon" xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-slate-200"
+                    viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z" />
+                    <path
+                        d="M19 11a1 1 0 1 0-2 0 5 5 0 0 1-10 0 1 1 0 1 0-2 0 7 7 0 0 0 6 6.92V20H8a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2h-3v-2.08A7 7 0 0 0 19 11z" />
+                </svg>
+            </div>
+            <p id="statusText" class="text-sm font-medium text-slate-400">Microphone idle</p>
+        </section>
+
+        <section class="w-full grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button id="startBtn"
+                class="col-span-1 sm:col-span-1 bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition rounded-xl py-3 font-semibold shadow-lg shadow-emerald-900/30">Start
+                Listening</button>
+            <button id="stopBtn" disabled
+                class="col-span-1 sm:col-span-1 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition rounded-xl py-3 font-semibold shadow-lg shadow-rose-900/30">Stop</button>
+            <div
+                class="col-span-1 sm:col-span-1 bg-slate-900/70 border border-slate-800 rounded-xl px-4 py-2 flex flex-col justify-center">
+                <span class="text-xs text-slate-400">Events detected</span>
+                <span id="eventCount" class="text-lg font-bold">0</span>
+            </div>
+        </section>
+
+        <section class="w-full bg-slate-900/70 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-4">
+            <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wide">Detection Parameters</h2>
+
+            <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-400">
+                    <span>Energy Threshold (RMS)</span><span id="energyVal">0.020</span>
+                </div>
+                <input id="energyRange" type="range" min="0.002" max="0.15" step="0.001" value="0.020"
+                    class="w-full accent-emerald-500" />
+            </div>
+
+            <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-400">
+                    <span>Attack Frames (ms to confirm speech)</span><span id="attackVal">60</span>
+                </div>
+                <input id="attackRange" type="range" min="10" max="300" step="10" value="60"
+                    class="w-full accent-emerald-500" />
+            </div>
+
+            <div class="space-y-1">
+                <div class="flex justify-between text-xs text-slate-400">
+                    <span>Release Frames (ms to confirm silence)</span><span id="releaseVal">240</span>
+                </div>
+                <input id="releaseRange" type="range" min="50" max="800" step="10" value="240"
+                    class="w-full accent-emerald-500" />
+            </div>
+        </section>
+
+        <footer class="text-xs text-slate-600 text-center pb-4">
+            Architecture: Strategy + Observer + Facade patterns &middot; Web Audio API &middot; No server required
+        </footer>
+    </div>
+
+    <script src="js/vadStrategy.js"></script>
+    <script src="js/audioCapture.js"></script>
+    <script src="js/vadEngine.js"></script>
+    <script src="js/visualizer.js"></script>
+    <script src="js/uiController.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
